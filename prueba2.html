@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      let blocks = 0xaa; // Valor hexadecimal
+      let x = 10;
+      let y = 20;
+      let col = 0;
+      let row = 0;
+
+      function fn(a, b) {
+        console.log("Se llamó a la función con los argumentos:", a, b);
+      }
+
+      for (let bit = 0x8000; bit > 0; bit = bit >> 1) {
+        console.log(`el bit: ${bit}`);
+        if (blocks & bit) {
+          fn(x + col, y + row);
+        }
+        if (++col === 4) {
+          col = 0;
+          ++row;
+        }
+      }
+    </script>
+  </body>
+</html>

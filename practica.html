@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="tetris">
+      <div id="menu">
+        <p id="start" href="javascript.play()">Press Space to Play</p>
+        <p><canvas id="upcoming"></canvas></p>
+        <p>score <span id="score">00000</span></p>
+        <p>rows <span id="rows">0</span></p>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <script>
+      // datos para crear el tetris
+      var canvas = get("canvas");
+      var ctx = canvas.getContext("2d");
+      var ucanvas = get("upcoming");
+      var uctx = ucanvas.getContext("2d");
+      var dx,
+        dy,
+        playing,
+        current = {};
+      nx = 10; // ancho del tablero
+      ny = 20; // alto del tablero
+      nu = 5; // ancho del tablero de proximas piezas
+      function get(id) {
+        return document.getElementById(id);
+      }
+      function hide(id) {
+        get(id).style.display = "none";
+      }
+      function show(id) {
+        get(id).style.display = "block";
+      }
+      function html(id, html) {
+        get(id).innerHTML = html;
+      }
+      function timestamp() {
+        return new Date().getTime();
+      }
+      function random(min, max) {
+        return min + Math.random() * (max - min);
+      }
+      function randomChoice(choices) {
+        return choices[Math.round(random(0, choices.length - 1))];
+      }
+      function eachblock(type, x, y, dir, fn) {
+        var bit,
+          result,
+          row = 0,
+          col = 0,
+          blocks = type.blocks[dir];
+      }
+      // piezas
+      var i = {
+        size: 4,
+        blocks: [0x0f00, 0x2222, 0x00f0, 0x4444],
+        color: "cyan",
+      };
+      var j = {
+        size: 3,
+        blocks: [0x44c0, 0x8e00, 0x6440, 0x0e20],
+        color: "blue",
+      };
+      var l = {
+        size: 3,
+        blocks: [0x4460, 0x0e80, 0xc440, 0x2e00],
+        color: "orange",
+      };
+      var o = {
+        size: 2,
+        blocks: [0xcc00, 0xcc00, 0xcc00, 0xcc00],
+        color: "yellow",
+      };
+      var s = {
+        size: 3,
+        blocks: [0x06c0, 0x8c40, 0x6c00, 0x4620],
+        color: "green",
+      };
+      var t = {
+        size: 3,
+        blocks: [0x0e40, 0x4c40, 0x4e00, 0x4640],
+        color: "purple",
+      };
+      var z = {
+        size: 3,
+        blocks: [0x0c60, 0x4c80, 0xc600, 0x2640],
+        color: "red",
+      };
+      // logica del juego
+      function play() {
+        playing = true;
+      }
+      function lose() {
+        playing = false;
+      }
+      function getBlock(x, y) {
+        return blocks && blocks[x] ? blocks[x][y] : null;
+      }
+      // renderiza el tablero
+      var invalid = {};
+      function invalidate() {
+        invalid.court = true;
+      }
+      function draw() {
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.translate(0.5, 0.5); // para que las lineas se vean mas nitidas
+        drawCourt();
+        ctx.restore;
+      }
+      function setCurrentPiece(piece) {
+        current.type = piece || randomPiece();
+        current.x = Math.ceil((nx - current.type.size) / 2);
+        current.y = -2; // arriba del todo
+        current.dir = 0;
+      }
+      function drawPiece(ctx, type, x, y, dir) {
+        eachblock(type, x, y, dir, function (x, y) {
+          drawBlock(ctx, x, y, type.color);
+        });
+      }
+      function drawBlock(ctx, x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * dx, y * dy, dx, dy);
+        ctx.strokeRect(x * dx, y * dy, dx, dy);
+      }
+      function drawCourt() {
+        invalidate();
+        setCurrentPiece(i);
+        play();
+        if (invalid.court) {
+          console.log("drawing court");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (playing) {
+            drawPiece(ctx, current.type, current.x, current.y, current.dir);
+          }
+          var x, y, block;
+          for (y = 0; y < ny; y++) {
+            for (x = 0; x < nx; x++) {
+              if ((block = getBlock(x, y))) {
+                drawBlock(ctx, x, y, block.color);
+              }
+            }
+          }
+          ctx.strokeRect(0, 0, nx * dx - 1, ny * dy - 1); // tablero
+          invalid.court = false;
+        }
+      }
+      function drawBlock(ctx, x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * dx, y * dy, dx, dy);
+        ctx.strokeRect(x * dx, y * dy, dx, dy);
+      }
+      // repeticion del juego
+      function run() {
+        function frame() {
+          draw();
+        }
+        function resize(event) {
+          dx = canvas.width / nx;
+          dy = canvas.height / ny;
+          invalidate();
+        }
+        frame();
+        resize();
+      }
+      run();
+    </script>
+  </body>
+</html>
